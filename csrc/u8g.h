@@ -458,6 +458,9 @@ extern u8g_dev_t u8g_dev_a2_micro_printer_192x120_ds;
 extern u8g_dev_t u8g_dev_a2_micro_printer_192x360_ds;
 extern u8g_dev_t u8g_dev_a2_micro_printer_192x720_ds;
 
+/* linux frame buffer */
+extern u8g_dev_t u8g_dev_linux_fb;
+
 /* u8g_virtual_screen.c  */
 extern u8g_dev_t u8g_dev_vs;
 
