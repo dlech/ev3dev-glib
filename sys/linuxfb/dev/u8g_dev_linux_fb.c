@@ -44,6 +44,7 @@
 
 struct fb_t
 {
+  uint32_t size;
   struct fb_fix_screeninfo fix;
   struct fb_var_screeninfo var;
 } fb;
@@ -58,34 +59,43 @@ uint8_t map_fb()
 {
   int fd;
 
+  /* TODO: automatically find fb or allow to pass the file name as a parameter */
   fd = open("/dev/fb0", O_RDWR);
   if (fd == -1)
-    return -1;
+    return 0;
   if (ioctl(fd, FBIOGET_VSCREENINFO, &fb.var) == -1)
-    return -1;
+    return 0;
   if (ioctl(fd, FBIOGET_FSCREENINFO, &fb.fix) == -1)
-    return -1;
+    return 0;
+  /* only supports 1bpp for now */
+  if (fb.var.bits_per_pixel != 1)
+    return 0;
+  fb.size = fb.fix.line_length * fb.var.yres_virtual;
   u8g_dev_linux_fb_pb.width = fb.fix.line_length * 8;
-  u8g_dev_linux_fb_pb.buf = mmap(NULL, fb.var.yres_virtual * fb.fix.line_length,
-                                 PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+  u8g_dev_linux_fb_pb.buf = mmap(NULL, fb.size, PROT_READ | PROT_WRITE,
+                                 MAP_SHARED, fd, 0);
   if (u8g_dev_linux_fb_pb.buf == MAP_FAILED)
-    return -1;
-  u8g_dev_linux_fb_pb.p.page_height = fb.var.yres_virtual;
-  u8g_dev_linux_fb_pb.p.total_height = fb.var.yres_virtual;
+    return 0;
+  u8g_page_Init(&u8g_dev_linux_fb_pb.p, fb.var.yres_virtual, fb.var.yres_virtual);
   return 1;
 }
 
 uint8_t u8g_dev_linux_fb_fn(u8g_t *u8g, u8g_dev_t *dev, uint8_t msg, void *arg)
 {
-  if (msg != U8G_DEV_MSG_INIT && u8g_dev_linux_fb_pb.buf == 0)
-    return -1;
+  if (msg != U8G_DEV_MSG_INIT && u8g_dev_linux_fb_pb.buf == NULL)
+    return 0;
 
   switch(msg)
   {
     case U8G_DEV_MSG_INIT:
       return map_fb(); 
     case U8G_DEV_MSG_STOP:
-      return munmap(u8g_dev_linux_fb_pb.buf, fb.var.yres_virtual * fb.fix.line_length);
+      munmap(u8g_dev_linux_fb_pb.buf, fb.size);
+      u8g_dev_linux_fb_pb.buf = NULL;
+      return 1;
+    case U8G_DEV_MSG_GET_WIDTH:
+      *((u8g_uint_t *)arg) = fb.var.xres_virtual;
+      return 1;
   }
   return u8g_dev_pb8h1f_base_fn(u8g, dev, msg, arg);
 }
