@@ -380,6 +380,11 @@ uint8_t u8g_InitRW8Bit(u8g_t *u8g, u8g_dev_t *dev, uint8_t d0, uint8_t d1, uint8
 }
 #endif /* defined(U8G_WITH_PINLIST)  */
 
+uint8_t u8g_Stop(u8g_t *u8g)
+{
+  return u8g_call_dev_fn(u8g, u8g->dev, U8G_DEV_MSG_STOP, NULL);
+}
+
 void u8g_FirstPage(u8g_t *u8g)
 {
   u8g_FirstPageLL(u8g, u8g->dev);
