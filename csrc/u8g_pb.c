@@ -41,27 +41,12 @@
 void u8g_pb_Clear(u8g_pb_t *b)
 {
   uint8_t *ptr = (uint8_t *)b->buf;
-  uint8_t *end_ptr = ptr;
-  end_ptr += b->width;
+  int cnt = (b->width >> 3) * b->p.page_height;
   do
   {
     *ptr++ = 0;
-  } while( ptr != end_ptr );
+  } while(--cnt);
 }
-
-/* the following procedure does not work. why? Can be checked with descpic */
-/*
-void u8g_pb_Clear(u8g_pb_t *b)
-{
-  uint8_t *ptr = (uint8_t *)b->buf;
-  uint8_t cnt = b->width;
-  do
-  {
-    *ptr++ = 0;
-    cnt--;
-  } while( cnt != 0 );
-}
-*/
 
 /*
   intersection assumptions:
