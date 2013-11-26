@@ -1071,6 +1071,14 @@ void u8g_SetDefaultMidColor(u8g_t *u8g);
 #define u8g_GetWidth(u8g) ((u8g)->width)
 #define u8g_GetHeight(u8g) ((u8g)->height)
 #define u8g_GetMode(u8g) ((u8g)->mode)
+
+#define u8g_BeginDraw(u8g) \
+  u8g_FirstPage(u8g);      \
+  do                       \
+  {
+
+#define u8g_EndDraw(u8g) } while( u8g_NextPage(u8g) )
+
 /*
   U8G_MODE_GET_BITS_PER_PIXEL(u8g_GetMode(u8g))
   U8G_MODE_IS_COLOR(u8g_GetMode(u8g)) 
